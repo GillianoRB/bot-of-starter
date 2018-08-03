@@ -1,0 +1,521 @@
+import discord
+import datetime
+from discord.ext import commands
+from discord.ext.commands import BucketType
+from discord.ext.commands import Bot
+from discord.utils import get
+import random
+import asyncio
+import time
+
+
+uptime = datetime.datetime.utcnow()
+
+Client = discord.Client()
+bot = commands.Bot(command_prefix='%')
+bot.remove_command('help')
+lines = open(r'accounts.txt').read().splitlines()
+
+@bot.event
+async def on_ready():
+    print("The CreepyBot is online!")
+    await bot.change_presence(game=discord.Game(name="%help", type=2))
+
+
+@bot.event
+async def on_message(message):
+    if 'vote' in message.content.lower():
+        await bot.add_reaction(message, '\U0001f1fe')
+        await bot.add_reaction(message, '\U0001f1f3')
+        await bot.send_message(message.channel, ':regional_indicator_y: for yes :regional_indicator_n: for no')
+    elif 'alt' in message.content.lower():
+        await bot.send_message(message.channel, f'{message.author.mention} go read <#472994334325735455>')
+    elif 'ALT' in message.content.lower():
+        await bot.send_message(message.channel, f'{message.author.mention} go read <#472994334325735455>')
+    await bot.process_commands(message)
+
+@bot.event
+async def on_reaction_add(reaction, user):
+    if reaction.me == True:
+        if user.id != '467728819835371540':
+            if reaction.emoji == '\U00002705':
+                 embed=discord.Embed(title="Help", description="------------", color=0x7100e1)
+                 embed.set_author(name=" This Is The Second Help")
+                 embed.add_field(name='1. %Cat', value='------------', inline=False)
+                 embed.add_field(name='2. %Ghost', value='------------', inline=True)
+                 embed.add_field(name='3. %add (*numbers) (example: if you do %add 4 1 bot will do the math it will add the plus between the 2 numbers and it will say 5)', value='Done', inline=False)
+                 embed.add_field(name='4. %minus (same as %add only it does minus)', value='------------', inline=True)
+                 embed.add_field(name='5. %times (same as %add only it does times)', value='------------', inline=True)
+                 embed.add_field(name='6. %joined_at (Membername))', value='------------', inline=False)
+                 embed.add_field(name='react with :x: to go back to help 1', value='done', inline=True)
+                 msg = await bot.send_message(reaction.message.channel, embed=embed)
+                 await bot.add_reaction(msg, '\U0000274c')
+            elif reaction.emoji == '\U0000274c':
+                embed=discord.Embed(title="Help", description="------------", color=0x7100e1)
+                embed.set_author(name="Welcome Back To Help 1")
+                embed.add_field(name='1. %sudo text', value='------------', inline=False)
+                embed.add_field(name='2. %botuptime', value='------------', inline=True)
+                embed.add_field(name='3. %info @user', value='------------', inline=False)
+                embed.add_field(name='react with :white_check_mark: to read more', value='done', inline=False)
+                msg = await bot.send_message(reaction.message.channel, embed=embed)
+                await bot.add_reaction(msg, '\U00002705')
+                
+@bot.command()
+async def add(a: int, b: int):
+    await bot.say(a+b)
+
+@bot.command()
+async def minus(a: int, b: int):
+    await bot.say(a-b)
+
+@bot.command()
+async def times(a: int, b:int):
+    await bot.say(a*b)
+
+@bot.command()
+async def divide(a: int, b:int):
+    await bot.say(a^b)
+
+
+@bot.event
+async def on_command_error(error, ctx):
+    lol = error
+    await bot.send_message(ctx.message.channel, f'{error} this doesnt exist')
+
+
+@bot.command(pass_context=True)
+async def DoneReadingRules(ctx):
+    await bot.delete_message(ctx.message)
+    await bot.say("Really?")
+    await bot.add_reaction(message, '\U0001f44d')
+    await bot.add_reaction(message, '\U0001f44e')
+
+@bot.command(pass_context=True)
+@commands.cooldown(1, 50, commands.BucketType.user)
+async def Cat(ctx):
+    await bot.delete_message(ctx.message)
+    Picture = ["https://i.imgur.com/xFmNXWj.png", "https://i.imgur.com/5Y1OScF.png", "https://i.imgur.com/vv6Su8d.png", "https://i.imgur.com/CLANTSt.png", "https://i.imgur.com/FbrsPBT.png", "https://i.imgur.com/mfQGRLb.png", "https://i.imgur.com/vBIpg9l.png", "https://i.imgur.com/lUp0L3C.png", "https://i.imgur.com/yzHZBWz.png", "https://i.imgur.com/YbINCvc.png", "https://i.imgur.com/UryZYf3.png", "https://i.imgur.com/e0D1ORV.png", "https://i.imgur.com/pWHdHxO.png", "https://i.imgur.com/t6nE65v.png", "https://i.imgur.com/Yp2b9tD.png", "https://i.imgur.com/skURKzI.png", "https://i.imgur.com/4PhUY5b.png"]
+    await bot.send_message(ctx.message.channel, random.choice(Picture))
+
+@bot.command(pass_context=True)
+async def ping(ctx):
+    await bot.send_message(ctx.message.channel, ":ping_pong: Pong")
+
+
+
+def get_uptime(brief=False):
+    now = datetime.datetime.utcnow()
+    delta = now - uptime
+    hours, remainder = divmod(int(delta.total_seconds()), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    days, hours = divmod(hours, 24)
+    if not brief:
+        if days:
+            fmt = '**{d}** days, **{h}** hours, **{m}** minutes, and **{s}** seconds'
+        else:
+            fmt = '**{h}** hours, **{m}** minutes, and **{s}** seconds'
+    else:
+        fmt = '**{h}**h, **{m}**m, **{s}**s'
+        if days:
+            fmt = '{d}d ' + fmt
+    return fmt.format(d=days, h=hours, m=minutes, s=seconds)
+
+@bot.command()
+async def botuptime():
+    embed = discord.Embed(
+            title = (get_uptime()),
+            )
+    await bot.say(embed=embed)
+
+@bot.command(pass_context=True)
+async def RapBattle(ctx):
+    await bot.say(random.choice(["Yo Let me go first Or are you just on the thirst On the Friday you will get beaten by my rhymes that got the times you will never see the raps when you got the maps... Your Turn Say Somthing After Do ?RapBattle", "Yo Your A Chicken In A Nugget you always sleep in a bucket", "Well DJ Put The Music Up :minidisc: oh let me tell you some thing when you ever got born you got blowned up by the horn you never get to see ppl in this clothes well because so all you wear is a bell"]))
+
+@bot.command(pass_context=True)
+@commands.cooldown(5, 604800, commands.BucketType.user)
+async def gen(ctx):
+    userName = ctx.message.author.name
+    userID = ctx.message.author.id
+
+    if ctx.message.server:
+        await bot.delete_message(ctx.message)
+    myline = random.choice(lines)
+    split = myline.partition(":")
+    
+    embed=discord.Embed(title="Minecraft Account", color=0xf45eff)
+    embed.set_thumbnail(url="https://pre00.deviantart.net/3d13/th/pre/i/2016/343/0/7/free_minecraft_logo_template_by_curtzeninja-dar2dou.png")
+    embed.add_field(name="Email/Username:", value=split[0], inline=False)
+    embed.add_field(name="Password:", value=split[2], inline=False)
+    await bot.send_message(ctx.message.author, embed=embed)
+
+    print("{} Typed ?gen".format(userName))
+
+
+
+@bot.command(pass_context=True)
+async def logout(ctx):
+    if ctx.message.author.id == "244169411026485259":
+        embed = discord.Embed(
+            title = 'Shutting down...',
+            colour = discord.Colour.green()
+        )
+        await bot.say(embed=embed)
+        await bot.logout()
+    elif ctx.message.author.id == "257575046288113665":
+        embed = discord.Embed(
+            title = 'Shutting down...',
+            colour = discord.Colour.green()
+        )
+        await bot.say(embed=embed)
+        await bot.logout()
+    else:
+        embed = discord.Embed(
+            title = 'Dont You Even Do That Again You Dont Wanna see whats Gonna Happen',
+            colour = discord.Colour.red()
+        )
+        await bot.say(embed=embed)
+    
+
+@bot.command(pass_context=True)
+async def GEN(ctx):
+    await bot.delete_message(ctx.message)
+    await bot.say("Wrong Cmd Bro Its ?gen and btw acc will not work untill Creepergilly refills it")
+
+@bot.command(pass_context=True)
+async def serverinfo(ctx):
+    embed = discord.Embed(name="{}'s info".format(ctx.message.server.name), description="Here's what I could find.", color=0x00ff00)
+    embed.set_author(name="Info")
+    embed.add_field(name="Name", value=ctx.message.server.name, inline=True)
+    embed.add_field(name="ID", value=ctx.message.server.id, inline=True)
+    embed.add_field(name="Roles", value=len(ctx.message.server.roles), inline=True)
+    embed.add_field(name="Members", value=len(ctx.message.server.members))
+    embed.set_thumbnail(url=ctx.message.server.icon_url)
+    await bot.say(embed=embed)
+
+@bot.command(pass_context=True)
+async def Soccer(ctx):
+    await bot.say(random.choice(["1-0",
+                                "1-1",
+                                "1-0",
+                                "1-1",
+                                "0-1",
+                                "0-1"]))
+
+
+
+@bot.command(pass_context=True)
+async def CreeperFlip(ctx):
+    await bot.say(random.choice([f"{ctx.message.author.name} has Head :scream: ",
+                                                         f"{ctx.message.author.name} has 4 feets :scream: ",
+                                                         f"{ctx.message.author.name} has Head :scream: ",
+                                                         f"{ctx.message.author.name} has 4 feets :scream: ",
+                                                         f"{ctx.message.author.name} has Special Creeper :scream: ",
+                                                         f"{ctx.message.author.name} has Special Creeper :scream: "]))
+
+
+@bot.command(pass_context=True)
+async def LyingTest(ctx):
+    await bot.say(random.choice(["you are a liar",
+                                "you said the truth",
+                                "you are a liar",
+                                "you said the truth"]))
+
+@bot.command(pass_context=True)
+async def RandomLyingTest(ctx, user: discord.Member):
+    await bot.say(random.choice([f"{user.name} is a liar",
+                                f"{user.name} is a liar",
+                                f"{user.name}  said the truth"]))
+
+@bot.command(pass_context=True)
+async def info(ctx, user: discord.Member):
+    embed = discord.Embed(title="{}'s info".format(user.name), description="Here's what I could find.", color=0x00ff00)
+    embed.add_field(name="Name", value=user.name, inline=True)
+    embed.add_field(name="ID", value=user.id, inline=True)
+    embed.add_field(name="Status", value=user.status, inline=True)
+    embed.add_field(name="Highest role", value=user.top_role)
+    embed.add_field(name="Joined", value=user.joined_at)
+    embed.set_thumbnail(url=user.avatar_url)
+    await bot.say(embed=embed)
+
+
+@bot.command(pass_context=True)
+async def help(ctx):
+    embed=discord.Embed(title="Help", description="------------", color=0x7100e1)
+    embed.set_author(name=f"{ctx.message.author.mention}")
+    embed.add_field(name='1. %sudo text', value='------------', inline=False)
+    embed.add_field(name='2. %botuptime', value='------------', inline=True)
+    embed.add_field(name='3. %info @user', value='------------', inline=False)
+    embed.add_field(name='react with :white_check_mark: to read more', value='done', inline=True)
+    my_message = await bot.say(embed=embed)
+    await bot.add_reaction(my_message, '\U00002705')
+    
+      
+    
+
+@bot.command(pass_context=True)
+async def help2(ctx):
+    embed=discord.Embed(title="Help", description="------------", color=0x7100e1)
+    embed.set_author(name=f"{ctx.message.author.mention} This Is The Second Help")
+    embed.add_field(name='1. %Cat', value='------------', inline=False)
+    embed.add_field(name='2. %Ghost', value='------------', inline=True)
+    embed.add_field(name='3. %ticket text', value='Done', inline=False)
+    await bot.say(embed=embed)
+
+
+@bot.command(pass_context=True)
+async def PlayMe(ctx):
+    await bot.say("'never' JK type CP!play to play with me")
+
+@bot.command(pass_context=True)
+async def purge(context, number : int):
+    """Clear a specified number of messages in the chat"""
+    await bot.purge_from(context.message.channel, limit=number)
+
+				
+
+@bot.command(pass_context=True)
+async def joined_at(ctx, member: discord.Member = None):
+    if member is None:
+        member = ctx.message.author
+
+    await bot.say('{0} joined at {0.joined_at}'.format(member))
+
+@bot.command(pass_context=True)
+async def Appearance(ctx):
+    if ctx.message.author.id == '244169411026485259':
+        embed = discord.Embed(
+            title = 'You Are The Bot Creator',
+            colour = discord.Colour.green()
+        )
+        await bot.say(embed=embed)
+    else:
+        embed = discord.Embed(
+            title = 'You Are A No One That Tried To See If You Are Bot Creator',
+            colour = discord.Colour.red()
+        )
+        await bot.say(embed=embed)
+
+@bot.command(pass_context=True)
+async def HelpMe(ctx):
+    await bot.say("Help me i need more source code with python DM Creepergilly ")
+
+@bot.command(pass_context=True)
+async def Speed(ctx):
+    await bot.say("faster then Race car")
+    
+@bot.command(pass_context=True)
+async def OG(ctx):
+    await bot.say("wrong server dude")
+
+
+@bot.command()
+async def repeat(times : int, content='repeating...'):
+    """Repeats a message multiple times."""
+    for i in range(times):
+        await bot.say(content)
+
+@bot.command(pass_context=True)
+async def login(ctx,*, content):
+    await bot.send_message(bot.get_channel("474018059070210049"), f"{ctx.message.author.mention} has logged in as {content}")
+    await bot.send_message(ctx.message.author, "now read rules")
+    roles = discord.utils.get(ctx.message.server.roles, name="Logged in")
+    await bot.add_roles(ctx.message.author, roles)
+
+@bot.command(pass_context=True)
+@commands.cooldown(1, 50, commands.BucketType.user)
+async def Ghost(ctx):
+    await bot.delete_message(ctx.message)
+    ScaryPic = ["https://i.imgur.com/1dYK7jq.png", "https://i.imgur.com/4LTNR1f.png", "https://i.imgur.com/88Uyl61.png", "https://i.imgur.com/hOqrerf.png", "https://i.imgur.com/QwkQb4v.png", "https://i.imgur.com/ofZ5HbQ.png", "https://i.imgur.com/QFdd8qQ.png", "https://i.imgur.com/h2edpqu.png", "https://i.imgur.com/d7JVNZz.png", "https://i.imgur.com/DyvBKHP.png"]
+    await bot.send_message(ctx.message.channel, random.choice(ScaryPic))
+
+@bot.command(pass_context=True)
+async def Procent(ctx):
+    embed = discord.Embed(title="%of winning", description="3 to 6% ", color=0x00ff00)
+    embed.set_author(name="----")
+    embed.add_field(name="Who Might Win?", value="Parker And Tyler", inline=False)
+    await bot.say(embed=embed)
+
+@bot.command(pass_context=True)
+async def Truth(ctx):
+    await bot.say("to be fair Creepergilly is a noob")
+    await asyncio.sleep(10)
+    await bot.say("just kidding no one is a noob")
+
+@bot.command(pass_context=True)
+async def ticket(ctx,*, content):
+    everyone_perms = discord.PermissionOverwrite(read_messages=False)
+    my_perms = discord.PermissionOverwrite(read_messages=True)
+
+    everyone = discord.ChannelPermissions(target=ctx.message.server.default_role, overwrite=everyone_perms)
+    mine = discord.ChannelPermissions(ctx.message.author, overwrite=my_perms)
+    test = await bot.create_channel(ctx.message.server, 'ticket', everyone, mine)
+    await bot.delete_message(ctx.message)
+
+@bot.command(pass_context=True)
+async def removeticket(ctx):
+    await bot.remove_channel(ctx.message)
+
+@bot.command(pass_context=True)
+async def testwarn(ctx, user: discord.Member):
+    role = discord.utils.get(member.server.roles, name='Warning')
+    await bot.add_roles(member, role)
+
+@bot.command()
+async def addrole(ctx,*, content):
+    role = discord.utils.get(member.server.roles, name=content)
+    await bot.add_roles(member, role)
+    
+
+@bot.command(pass_context = 1)
+async def kick(context, user : discord.Member, *, reason : str = None):
+    if context.message.author.server_permissions.administrator:
+        if reason is None:
+             reason = 'No given reason.'
+             try:
+                 await bot.kick(user)
+                 await bot.send_message(context.message.channel, '[' + str(context.message.author.mention) + '] SUCCESSFULLY KICKED ' + str(user.mention))
+             except discord.errors.Forbidden:
+                 await bot.send_message(context.message.channel, '[' + str(context.message.author.mention) + '] UNSUCCESSFULLY KICKED ' + str(user.mention))
+             except:
+                 await bot.send_message(context.message.channel, '[' + str(context.message.author.mention) + '] ATTEMPTED TO KICK SOMEONE, BUT SOMETHING WENT WRONG.')
+    else:
+        await bot.say("you do not have perms")
+
+@bot.command(pass_context=True)
+async def ROLES(context):
+    ''' Displays all roles/IDs '''
+    roles = context.message.server.roles
+    result = 'The roles are``` '
+    for role in roles:
+        result += role.name + '``` ' + role.id + ',``` '
+    await bot.say(result)
+
+
+@bot.command(pass_context=True)
+async def verify(ctx):
+    role = discord.utils.get(ctx.message.server.roles, name="Member")
+    botmsg = f"you have been verified as {ctx.message.author.name} dont worry this will happen to all ppl that verified"
+    await bot.send_message(ctx.message.author, botmsg)
+    await bot.add_roles(ctx.message.author, role)
+
+@bot.command(pass_context=True)
+async def removeverify(ctx):
+    role = discord.utils.get(ctx.message.server.roles, name="Member")
+    botmsg = "you have removed ur member role"
+    await bot.send_message(ctx.message.author, botmsg)
+    await bot.remove_roles(ctx.message.author, role)
+
+@bot.command(pass_context=True)
+@commands.has_any_role('Staff')
+async def tempmute(ctx, member: discord.Member,*, content):
+    role = discord.utils.get(ctx.message.server.roles, name="Muted")
+    await bot.say(f"{member} has been muted for 30 seconds reason: {content}")
+    await bot.add_roles(member, role)
+    await asyncio.sleep(30)
+    await bot.say(f"{member} mute has been expired")
+    await bot.remove_roles(member, role)
+
+@bot.command(pass_context=True)
+@commands.has_any_role('Staff')
+async def permmute(ctx, member: discord.Member,*, content):
+    role = discord.utils.get(ctx.message.server.roles, name="Muted")
+    await bot.say(f"{member} has been perm muted reason: {content}")
+    await bot.add_roles(member, role)
+
+@bot.command(pass_context=True)
+@commands.has_any_role('Staff')
+async def removepermmute(ctx, member: discord.Member):
+    role = discord.utils.get(ctx.message.server.roles, name="Muted")
+    await bot.say(f"{member} has been removed from muted role")
+    await bot.remove_roles(member, role)
+
+@bot.command()
+async def create_role(ctx,*, content):
+    await bot.create_role(ctx.message.role, content)
+    await bot.say(f"succefully created {content}")
+
+
+@bot.command(pass_context=True)
+@commands.has_any_role('Staff')
+async def warn(ctx, member: discord.Member,*, content):
+    role = discord.utils.get(ctx.message.server.roles, name="Warning")
+    await bot.say(f"{member} has been warned reason: {content}")
+    await bot.add_roles(member, role)
+
+@bot.command(pass_context=True)
+async def nickme(ctx,*, content):
+    await bot.say(f"{ctx.message.author.mention} has successfully changed his nickname")
+    await bot.change_nickname(ctx.message, content)
+
+
+
+@bot.command(pass_context=True)
+async def say(self,*, content):
+    if self.message.author.id == '244169411026485259':
+        await bot.delete_message(self.message)
+        await bot.say(content)
+    elif self.message.author.id == '257575046288113665':
+        await bot.delete_message(self.message)
+        await bot.say(content)
+    elif self.message.author.id == '158392456746893312':
+        await bot.delete_message(self.message)
+        await bot.say(content)
+    elif self.message.author.id == '413135950206599168':
+        await bot.delete_message(self.message)
+        await bot.say(content)
+    else:
+        await bot.delete_message(self.message)
+        await bot.say("You Are Not Allowed To Use This Command You Can Use The None Special User *say that command is *sudo")
+
+
+@bot.command(pass_context=True)
+async def sudo(ctx,*, content):
+    if ctx.message.author.id == '244169411026485259':
+        embed = discord.Embed(
+            title = f"{ctx.message.author.name} is not allowed to use this command he has his own special command"
+            )
+        await bot.delete_message(ctx.message)
+        await bot.say(embed=embed)
+    elif ctx.message.author.id == '257575046288113665':
+        embed = discord.Embed(
+            title = f"{ctx.message.author.name} is not allowed to use this command he has his own special command"
+            )
+        await bot.delete_message(ctx.message)
+        await bot.say(embed=embed)
+    elif ctx.message.author.id == '413135950206599168':
+        embed = discord.Embed(
+            title = f"{ctx.message.author.name} is not allowed to use this command he has his own special command"
+            )
+        await bot.delete_message(ctx.message)
+        await bot.say(embed=embed)
+    elif ctx.message.author.id == '158392456746893312':
+        embed = discord.Embed(
+            title = f"{ctx.message.author.name} is not allowed to use this command he has his own special command"
+            )
+        await bot.delete_message(ctx.message)
+        await bot.say(embed=embed)
+    else:
+        embed = discord.Embed(
+            title = f"{ctx.message.author.name}'s Said",
+            description = content
+            )
+        await bot.delete_message(ctx.message)
+        await bot.say(embed=embed)
+
+@bot.command(pass_context=True)
+async def warningSudo(ctx,*, content):
+    if ctx.message.role.has('Warning'):
+        await bot.say('Oh No You Have Warning You Cant Use This ')
+    else:
+        await bot.say('Better')
+
+@bot.command(pass_context=True)
+async def TestBan(ctx):
+    if ctx.message.author.server_permissions.administrator:
+        await bot.say("This Is Just A Test SO Yeah")
+    else:
+        await bot.say("You Have No Perms")
+
+
+
+bot.run("Code Here")
